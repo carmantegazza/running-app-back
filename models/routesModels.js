@@ -7,7 +7,7 @@ const routesSchema = new mongoose.Schema({
     elevation_gain:{type: Number},
     estimated_moving_time:{type: Number},
     difficulty:{type: String},
-    map:{type: String}
+    image:{type: String}
 })
 
 const Routes = mongoose.model('routes', routesSchema)
