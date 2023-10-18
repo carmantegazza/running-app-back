@@ -27,7 +27,6 @@ const routesController = {
     },
     updateRoute: async(req, res) => {
       try {
-        //parametros: cual modifico, que modifico, el new es para que devuelva el objeto actualizado
         const route =  await Routes.findOneAndUpdate({_id:req.params.id}, req.body, {new:true})
         return res.status(200).json({success:true, route: route})
       } catch (error) {

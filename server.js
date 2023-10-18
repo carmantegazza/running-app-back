@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 5000
 app.set('port', PORT)
 
 const routesRouter = require('./routes/routesRouter.js')
+const eventsRouter = require('./routes/eventsRouter.js')
 
 //porque el origen de la peticion es distinto al del servidor 
 app.use(cors())
@@ -18,6 +19,6 @@ app.use(express.json())
 
 //procesa las solicitudes a traves del router
 app.get('/', (req, res) => {res.send('trainig app API')} )
-app.use( '/api', routesRouter )
+app.use( '/api', routesRouter, eventsRouter )
   
 app.listen(PORT, () => { console.log('server running on port: ' + app.get('port')) })
