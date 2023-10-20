@@ -2,12 +2,14 @@ const mongoose = require('mongoose')
 
 const eventsSchema = new mongoose.Schema({
     name:{type: String, required: true},
+    description:{type: String},
     date:{type: Date},
+    price:{type: Number},
     organizer:{type: String},
     organizer_img:{type: String},
-    route_place:{type: String}
+    route: {type: mongoose.Types.ObjectId, ref:'routes'}
 })
 
-const Events = mongoose.model('events', eventsSchema)
+const Event = mongoose.model('events', eventsSchema)
 
-module.exports = Events
+module.exports = Event

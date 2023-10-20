@@ -21,4 +21,5 @@ app.use(express.json())
 app.get('/', (req, res) => {res.send('trainig app API')} )
 app.use( '/api', routesRouter, eventsRouter )
   
+
 app.listen(PORT, () => { console.log('server running on port: ' + app.get('port')) })

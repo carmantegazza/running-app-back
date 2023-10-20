@@ -10,6 +10,6 @@ const routesSchema = new mongoose.Schema({
     image:{type: String}
 })
 
-const Routes = mongoose.model('routes', routesSchema)
+const Route = mongoose.model('routes', routesSchema)
 
-module.exports = Routes
+module.exports = Route

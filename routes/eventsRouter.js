@@ -6,6 +6,9 @@ const eventsController = require('../controllers/eventsController')
 eventsRouter.get('/events', eventsController.getEvents)
 eventsRouter.post('/events', eventsController.addEvent)
 
-eventsRouter.put('/event:id', eventsController.updateEvent)
+eventsRouter.put('/event/:id', eventsController.updateEvent)
+eventsRouter.delete('/event/:id', eventsController.deleteEvent)
+
+eventsRouter.get('/eventforroute/:id', eventsController.getEventsFromOneRoute)
 
 module.exports = eventsRouter
