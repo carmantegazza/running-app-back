@@ -1,11 +1,18 @@
 const Event = require('../models/eventsModels')
-const Route = require('../models/routesModels')
 
 const eventsController = {
     getEvents: async(req, res) => {
         try {
             const events = await Event.find()
             return res.json({message: 'events', events: events})
+        } catch (error) {
+            return res.status(500).json({success:false})
+        }
+    },
+    getEvent: async(req, res) => {
+        try {
+            const event = await Event.findById(req.params.id)
+            return res.status(200).json({success:true, message: 'found event', event: event})
         } catch (error) {
             return res.status(500).json({success:false})
         }
