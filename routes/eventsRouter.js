@@ -4,7 +4,7 @@ const eventsRouter= express.Router()
 const eventsController = require('../controllers/eventsController')
 
 eventsRouter.get('/events', eventsController.getEvents)
-eventsRouter.get('/event/:_id', eventsController.getEvent)
+eventsRouter.get('/events/:_id', eventsController.getEvent)
 eventsRouter.post('/events', eventsController.addEvent)
 
 eventsRouter.put('/event/:id', eventsController.updateEvent)
