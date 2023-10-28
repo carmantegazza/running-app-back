@@ -9,7 +9,7 @@ const validator = (req, res, next) => {
         .email({minDomainSegments:2})
         .required()
         .messages({
-            'string.email':'formato incorrecto de mail'
+            'string.email':'the email format is wrong'
         }),
         password: joi.string() 
             .min(8)
@@ -17,9 +17,9 @@ const validator = (req, res, next) => {
             .pattern(new RegExp(/(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])/))
             .required()
             .messages({
-                'string.min': 'el password debe tener un minimo de 8 caracteres',
-                'string.max': 'el password debe tener un maximo de 30 caracteres',
-                'string.pattern.base':'el password debe contener mayuscula, minuscula y numeros'
+                'string.min': 'The password must have a minimum of 8 characters',
+                'string.max': 'The password must have a maximum of 30 characters',
+                'string.pattern.base': 'The password must contain uppercase, lowercase and numbers'
             }),
         from: joi.string()
             .required(),
