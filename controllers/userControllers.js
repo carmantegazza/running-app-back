@@ -27,7 +27,7 @@ const userControllers = {
                     userExist.password.push(contraseñaHash)
 
                     if(from !== 'signUp-form'){
-                        userExist.emailVerified = true
+                        userExist.emailVerify = true
                     }
                     
                     await userExist.save()
@@ -60,7 +60,7 @@ const userControllers = {
                     message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it"
                 })
                 } else {
-                    nuevoUsuario.emailVerified = true
+                    nuevoUsuario.emailVerify = true
                     await nuevoUsuario.save()
 
                 res.json({

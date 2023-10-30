@@ -7,7 +7,7 @@ const userSchema =  new mongoose.Schema({
     from:{type:Array},
     aplication:{type:String},
     uniqueString:{type:String, required:true},
-    emailVerified:{type:Boolean, required:true},
+    emailVerify:{type:Boolean, required:true},
 })
 
 const User = mongoose.model('users', userSchema)
