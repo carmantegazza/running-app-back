@@ -1,5 +1,6 @@
 const bcryptjs = require('bcryptjs')
 const Users = require('../models/userModel')
+const crypto = require('crypto')
 
 const userControllers = {
 
@@ -8,6 +9,8 @@ const userControllers = {
 
         const { fullName, email, password, from, aplication } = req.body.userData
         const contraseñaHash = bcryptjs.hashSync(password, 10)
+        const emailVerify = false
+        const uniqueString = crypto.randomBytes(15).toString('hex')
         try {
             const userExist = await Users.findOne({ email })
 
@@ -20,41 +23,53 @@ const userControllers = {
                     })
                 }
                 else {
-
                     userExist.from.push(from)
                     userExist.password.push(contraseñaHash)
 
+                    if(from !== 'signUp-form'){
+                        userExist.emailVerified = true
+                    }
+                    
                     await userExist.save()
-
+                   
                     res.json({
                         success: true,
                         from: from,
                         message: "Added " + from + " to your methods to perform sign in"
                     })
                 }
-
-            }
-            else {
-
-                const nuevoUsuario = new Users({
+            } else {
+                    const nuevoUsuario = new Users({
                     fullName,
                     email,
                     password: [contraseñaHash],
                     from: [from],
-                    aplication
+                    aplication,
+                    emailVerify,
+                    uniqueString
                 })
 
-                await nuevoUsuario.save()
+                if(from === 'signUp-form'){
+
+                    await nuevoUsuario.save()
+                    // funcion que envia el mail de verificacion
+                
+                res.json({
+                    success: true,
+                    from: from,
+                    message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it"
+                })
+                } else {
+                    nuevoUsuario.emailVerified = true
+                    await nuevoUsuario.save()
 
                 res.json({
                     success: true,
                     from: from,
                     message: " Congratulations, we created your user and added " + from + " to your methods to sign in"
                 })
-
             }
-
-
+        }
         }
         catch (error) {
             console.log(error)
@@ -125,8 +140,7 @@ const userControllers = {
                                 from,
                                 message: "We are sorry but the username or password do not match"
                             })
-                        
-
+                      
                     }
                 }
             }
