@@ -1,9 +1,57 @@
 const bcryptjs = require('bcryptjs')
 const Users = require('../models/userModel')
 const crypto = require('crypto')
+const nodemailer = require('nodemailer')
+const {google} = require('googleapis') 
+const OAuth2 = google.auth.OAuth2
+
+const sendMail = async (email, uniqueString)=>{
+
+    const myOAuth2Client = new OAuth2(
+        process.env.GOOGLE_CLIENTID,
+        process.env.GOOGLE_SECRET,
+        "https://developers.google.com/oauthplayground"
+    )
+
+    myOAuth2Client.setCredentials({refresh_token:process.env.GOOGLE_REFRESHTOKEN})
+    const accessToken = myOAuth2Client.getAccessToken()
+    const transporter = nodemailer.createTransport({
+
+        service: "gmail",
+        auth:{
+            user:"d13g0d3v@gmail.com",
+            type: "OAuth2",
+            clientId: process.env.GOOGLE_CLIENTID,
+            clientSecret:process.env.GOOGLE_SECRET,
+            refreshToken: process.env.GOOGLE_REFRESHTOKEN,
+            accessToken: accessToken
+        },
+        tls:{
+            rejectUnauthorized: false
+        } 
+    })
+
+    const mailOptions = {
+        from: "d13g0d3v@gmail.com",
+        to: email,
+        subject: "Email Verification Link",
+        html: `
+        <div>
+        <h1>Welcome to training-app</h1>
+        <h3>Thank you for registering with us</h3>
+        <p></p>
+        <h2> Please click on the <a href=http://localhost:4000/api/users/auth/verifyEmail/${uniqueString}>following link</a> to verify your account </h2>
+        </div>
+        `
+    }
+
+    transporter.sendMail(mailOptions, function(error, response){
+        if(error){console.log(error)}
+        else{console.log("message sent")}
+    })
+}
 
 const userControllers = {
-
 
     SignUp: async (req, res) => {
 
@@ -26,20 +74,21 @@ const userControllers = {
                     userExist.from.push(from)
                     userExist.password.push(contraseñaHash)
 
-                    if(from !== 'signUp-form'){
-                        userExist.emailVerify = true
+                    if(from !== "signUp-form"){
+                       userExist.emailVerify = true 
                     }
                     
                     await userExist.save()
-                   
+
                     res.json({
                         success: true,
                         from: from,
                         message: "Added " + from + " to your methods to perform sign in"
                     })
                 }
-            } else {
-                    const nuevoUsuario = new Users({
+            }
+            else {
+                const nuevoUsuario = new Users({
                     fullName,
                     email,
                     password: [contraseñaHash],
@@ -49,31 +98,33 @@ const userControllers = {
                     uniqueString
                 })
 
-                if(from === 'signUp-form'){
+                if (from === "signUp-form") {
 
                     await nuevoUsuario.save()
                     // funcion que envia el mail de verificacion
-                
-                res.json({
-                    success: true,
-                    from: from,
-                    message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it"
-                })
-                } else {
+                    sendMail(email, uniqueString)
+                    
+                    res.json({
+                        success: true,
+                        from: from,
+                        message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it"
+                    })
+                }
+                else {
                     nuevoUsuario.emailVerify = true
                     await nuevoUsuario.save()
 
-                res.json({
-                    success: true,
-                    from: from,
-                    message: " Congratulations, we created your user and added " + from + " to your methods to sign in"
-                })
+                    res.json({
+                        success: true,
+                        from: from,
+                        message: " Congratulations, we created your user and added " + from + " to your methods to sign in"
+                    })
+                }
             }
-        }
         }
         catch (error) {
             console.log(error)
-            res.json({ success: false, message: "Something has gone wrong, please try again in a few minutes" })
+            res.json({ success: false, message: "Something has gone wrong, please try again in a few minutes"  })
         }
     },
 
@@ -105,42 +156,40 @@ const userControllers = {
                         res.json({
                             success: true,
                             from,
-                            response: {dataUser},
-                            message: "Welcome, we are happy to see you back !!! " + dataUser.fullName
+                            response: { dataUser },
+                            message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
                         })
 
                     } else {
                         const contraseñaHash = bcryptjs.hashSync(password, 10)
                         usuario.from.push(from)
                         usuario.password.push(contraseñaHash)
-
                         await usuario.save()
 
                         res.json({
                             success: true,
                             from,
-                            response: {dataUser},
-                            message: "We didn't have " + from + " in your methods to perform Sign In, but don't worry, we've added it!!!!!"
+                            response: { dataUser },
+                            message: "We didn't have " + from + " in your methods to perform Sign In, but don't worry, we've added it!!!"
                         })
                     }
                 } else {
-                    
+
                     if (contraseñaCoincide.length > 0) {
                         res.json({
                             success: true,
                             from,
-                            response: {dataUser},
-                            message: "Welcome, we are happy to see you back !!! " + dataUser.fullName
+                            response: { dataUser },
+                            message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
                         })
 
                     } else {
-                        
-                            res.json({
-                                success: false,
-                                from,
-                                message: "We are sorry but the username or password do not match"
-                            })
-                      
+
+                        res.json({
+                            success: false,
+                            from,
+                            message: "We are sorry but the username or password do not match"
+                        })
                     }
                 }
             }
@@ -149,7 +198,7 @@ const userControllers = {
             res.jsonj({
                 success: false,
                 from: from,
-                message: "Oops something went wrong, please try again in a few minutes",
+                message: "Oops something went wrong, try again in a few minutes",
                 response: err
             })
         }
