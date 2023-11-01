@@ -195,11 +195,39 @@ const userControllers = {
             }
 
         } catch (err) {
-            res.jsonj({
+            res.json({
                 success: false,
                 from: from,
                 message: "Oops something went wrong, try again in a few minutes",
                 response: err
+            })
+        }
+    },
+    verifyMail: async (req, res) => {
+        try {
+            const { string } = req.params
+            const usuario = await Users.findOne({ uniqueString: string })
+            res.redirect('http://localhost:3000/signin')
+
+            if (usuario) {
+                usuario.emailVerify = true
+                await usuario.save()
+                
+            }
+            else {
+                res.json({
+                    success: false,
+                    from: "verifyMail",
+                    message: "You have not verified your email"
+                })
+            }
+        }
+        catch (error) {
+            res.json({
+                success: false,
+                from: "verifyMail",
+                message: "Oops something went wrong, try again in a few minutes",
+                response: error
             })
         }
     }
