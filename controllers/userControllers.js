@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const {google} = require('googleapis') 
 const OAuth2 = google.auth.OAuth2
+const jwt = require('jsonwebtoken')
 
 const sendMail = async (email, uniqueString)=>{
 
@@ -129,7 +130,7 @@ const userControllers = {
     },
 
     SignIn: async (req, res) => {
-        const { email, password, from } = req.body.userData
+        const { email, password, from, aplication } = req.body.userData
 
         try {
             const usuario = await Users.findOne({ email })
@@ -146,17 +147,20 @@ const userControllers = {
                     id: usuario._id,
                     fullName: usuario.fullName,
                     email: usuario.email,
-                    from: from
+                    from: from,
+                    aplication
                 }
 
                 if (from !== 'signUp-form') {
 
                     if (contraseñaCoincide.length > 0) {
+                        // JWT
+                        const token = jwt.sign({...dataUser}, process.env.SECRET_TOKEN, {expiresIn: '1h'})
 
                         res.json({
                             success: true,
                             from,
-                            response: { dataUser },
+                            response: { token , dataUser },
                             message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
                         })
 
@@ -165,21 +169,26 @@ const userControllers = {
                         usuario.from.push(from)
                         usuario.password.push(contraseñaHash)
                         await usuario.save()
+                        // JWT
+                        const token = jwt.sign({...dataUser}, process.env.SECRET_TOKEN, {expiresIn: '1h'})
 
                         res.json({
                             success: true,
                             from,
-                            response: { dataUser },
+                            response: { token , dataUser },
                             message: "We didn't have " + from + " in your methods to perform Sign In, but don't worry, we've added it!!!"
                         })
                     }
                 } else {
 
                     if (contraseñaCoincide.length > 0) {
+                         // JWT
+                         const token = jwt.sign({...dataUser}, process.env.SECRET_TOKEN, {expiresIn: '1h'})
+                         
                         res.json({
                             success: true,
                             from,
-                            response: { dataUser },
+                            response: { token, dataUser },
                             message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
                         })
 
