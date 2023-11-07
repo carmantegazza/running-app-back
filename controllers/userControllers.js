@@ -111,7 +111,6 @@ const userControllers = {
                         message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it",
                         
                     })
-                    // res.redirect('http://localhost:3000/signin')
                 }
                 else {
                     nuevoUsuario.emailVerify = true
@@ -242,7 +241,7 @@ const userControllers = {
         }else{
             res.json({
                 success:false,
-                message: "PPlease sign in again. Token is not valid"
+                message: "Please sign in again. Token is not valid"
             })
         }
     }
