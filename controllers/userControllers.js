@@ -108,8 +108,10 @@ const userControllers = {
                     res.json({
                         success: true,
                         from: from,
-                        message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it"
+                        message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it",
+                        
                     })
+                    // res.redirect('http://localhost:3000/signin')
                 }
                 else {
                     nuevoUsuario.emailVerify = true
@@ -213,15 +215,13 @@ const userControllers = {
         }
     },
     verifyMail: async (req, res) => {
+        const { string } = req.params
+        const user = await Users.findOne({ uniqueString: string })
         try {
-            const { string } = req.params
-            const usuario = await Users.findOne({ uniqueString: string })
-            res.redirect('http://localhost:3000/signin')
-
-            if (usuario) {
-                usuario.emailVerify = true
-                await usuario.save()
-                
+            if (user){
+                user.emailVerify = true
+                await user.save()
+                res.redirect('http://localhost:3000/signin')
             }
             else {
                 res.json({
@@ -230,13 +230,19 @@ const userControllers = {
                     message: "You have not verified your email"
                 })
             }
-        }
-        catch (error) {
+        }catch(err){console.log(err)}
+    },
+    verificarToken: (req, res)=>{
+        if(req.user){
             res.json({
-                success: false,
-                from: "verifyMail",
-                message: "Oops something went wrong, try again in a few minutes",
-                response: error
+                success: true,
+                response: { id:req.user.id, fullName:req.user.fullName, email:req.user.email, from:"token", aplication: req.user.aplication },
+                message: "Welcome token is valid " + req.user.fullName 
+            })
+        }else{
+            res.json({
+                success:false,
+                message: "PPlease sign in again. Token is not valid"
             })
         }
     }
