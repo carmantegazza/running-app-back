@@ -21,6 +21,7 @@ const eventsController = {
           return res.status(500).json({ success: false, message: 'Internal server error' });
         }
       },
+      
     addEvent: async(req, res) => {
         try {
             const newEvent = await Event.create(req.body)
