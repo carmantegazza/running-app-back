@@ -9,14 +9,18 @@ const eventsController = {
             return res.status(500).json({success:false})
         }
     },
-    getEvent: async(req, res) => {
+    getEvent: async (req, res) => {
         try {
-            const event = await Event.findById(req.params.id)
-            return res.status(200).json({success:true, message: 'found event', event: event})
+          const event = await Event.findById(req.params._id);
+          if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found' });
+          }
+          return res.status(200).json({ success: true, message: 'Found event', event: event });
         } catch (error) {
-            return res.status(500).json({success:false})
+          console.error(error); // Log the error to help diagnose the issue
+          return res.status(500).json({ success: false, message: 'Internal server error' });
         }
-    },
+      },
     addEvent: async(req, res) => {
         try {
             const newEvent = await Event.create(req.body)

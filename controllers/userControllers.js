@@ -132,9 +132,11 @@ const userControllers = {
 
     SignIn: async (req, res) => {
         const { email, password, from, aplication } = req.body.userData
+        console.log(req.body.userData)
 
         try {
             const usuario = await Users.findOne({ email })
+            console.log(usuario)
 
             if (!usuario) {
                 res.json({
