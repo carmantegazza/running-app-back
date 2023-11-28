@@ -27,10 +27,26 @@ const eventsController = {
     },
     updateEvent: async(req, res) => {
         try {
-            const event = await Event.findOneAndUpdate({_id:req.params.id}, req.body, {new:true})
-            return res.status(200).json({success:true, event:event})
+            const eventId = req.param.id
+            const userId = req.body.userId
+
+            const event = await Event.findOne({ _id: eventId });
+
+            if (!event) {
+            return res.status(500).json({ success: false, message: 'Event not found' });
+            }
+
+            if (event.users.includes(userId)) {
+            return res.status(500).json({ success: false, message: 'The user is already signed up fo the event' });
+            }
+
+            event.users.push(userId);
+            const updatedEvent = await event.save();
+
+            return res.status(200).json({ success: true, event: updatedEvent });
         } catch (error) {
-            return res.status(500).json({success:false})
+            console.error('Error al actualizar el evento:', error);
+            return res.status(500).json({ success: false });
         }
     },
 
