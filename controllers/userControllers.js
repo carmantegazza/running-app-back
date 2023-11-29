@@ -20,13 +20,21 @@ const sendMail = async (email, uniqueString)=>{
 
         service: "gmail",
         auth:{
-            user:"d13g0d3v@gmail.com",
+            user:"useremailverifymindhub@gmail.com",
             type: "OAuth2",
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
             refreshToken: process.env.GOOGLE_REFRESHTOKEN,
             accessToken: accessToken
         },
+        // auth:{
+        //     user:"d13g0d3v@gmail.com",
+        //     type: "OAuth2",
+        //     clientId: process.env.GOOGLE_CLIENTID,
+        //     clientSecret:process.env.GOOGLE_SECRET,
+        //     refreshToken: process.env.GOOGLE_REFRESHTOKEN,
+        //     accessToken: accessToken
+        // },
         tls:{
             rejectUnauthorized: false
         } 
