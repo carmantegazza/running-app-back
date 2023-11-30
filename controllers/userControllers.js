@@ -79,27 +79,6 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
                          </div>` 
     }
     
-    
-    
-    
-    // await transporter.sendMail(mailOptions, function(error, response){
-    //     let transporterMail
-    //     if(error){
-
-    //         console.log('Mensaje no enviado')
-            
-    //         transporterMail = error
-
-    //     }else{
-
-    //         console.log('Mensaje enviado')
-    //         transporterMail = response    
-    //     }
-    //     //transporterMail = response
-    //     return transporterMail
-    // })
-    //.then(res => console.log(res))
-    
     let response = await transporter.sendMail(mailOptions)
     .then(res => {
         return {
@@ -168,13 +147,12 @@ const userControllers = {
                 if (from === "signUp-form") {
 
                     await nuevoUsuario.save()
-
-                    const subject =  "Email Verification Link"
                     
-                    let mail = await sendMail('verifyEmail',email, uniqueString,subject)
-                    console.log('this is mail success' + mail.success)
+                    let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
 
                     if(mail.success){
+                        console.log('this is mail success' + mail.success)
+
                         res.json({
                         success: true,
                         from: from,
@@ -206,6 +184,47 @@ const userControllers = {
         catch (error) {
             console.log(error)
             res.json({ success: false, message: "Something has gone wrong, please try again in a few minutes"  })
+        }
+    },
+
+    sendEmail: async (req,res)=>{
+        let uniqueString
+        const { fullName, email, password, from, aplication } = req.body.userData
+        let user = await Users.findOne({ email })
+            .then(res => uniqueString = res.uniqueString)
+
+        let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+
+        if(mail.success){
+            res.json({
+            success: true,
+            from: from,
+            message: " Validation email successfully sent to " + email,
+            })
+        }else{          
+            res.json({
+                success: false,
+                from: from,
+                message: 'There was a problem while sending validation to ' + email + ' please, try again or correct your email',
+            })
+        }
+    },
+
+    deleteDocument: async (req,res)=>{
+        
+        try{
+            
+            const { firstName, email, password, from} = req.body
+            let userId = await Users.findOne({ email })
+            .then(res => {
+                return res.id
+            })
+
+            await Users.findByIdAndDelete(userId)
+            return res.status(200).json({success:true,message:'User deleted successfully'})
+        }catch(err){
+            console.log(err.message)
+            return res.status(500).json({success:false,message:'Internal server error'})
         }
     },
     PreSignIn: async (req,res) => {
