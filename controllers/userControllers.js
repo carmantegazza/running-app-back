@@ -27,8 +27,8 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
             type: "OAuth2",
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
-            // refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-             refreshToken: process.env.GOOGLE_REFRESHTOKE,
+            refreshToken: process.env.GOOGLE_REFRESHTOKEN,
+            //refreshToken: process.env.GOOGLE_REFRESHTOKE,
             accessToken: accessToken
         },
         tls:{
