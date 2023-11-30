@@ -6,7 +6,7 @@ const {google} = require('googleapis')
 const OAuth2 = google.auth.OAuth2
 const jwt = require('jsonwebtoken')
 
-const sendMail = async (email, uniqueString)=>{
+const sendMail = async (type,email, uniqueString,emailSubject)=>{
 
     const myOAuth2Client = new OAuth2(
         process.env.GOOGLE_CLIENTID,
@@ -14,13 +14,16 @@ const sendMail = async (email, uniqueString)=>{
         "https://developers.google.com/oauthplayground"
     )
 
-    myOAuth2Client.setCredentials({refresh_token:process.env.GOOGLE_REFRESHTOKEN})
+    myOAuth2Client.setCredentials({
+        refresh_token:process.env.GOOGLE_REFRESHTOKEN
+    })
+    
     const accessToken = myOAuth2Client.getAccessToken()
     const transporter = nodemailer.createTransport({
 
         service: "gmail",
         auth:{
-            user:"d13g0d3v@gmail.com",
+            user:"aprosgonzalo@gmail.com",
             type: "OAuth2",
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
@@ -32,24 +35,65 @@ const sendMail = async (email, uniqueString)=>{
         } 
     })
 
+    // const body = ()=>{
+    //     let response;
+    //     switch(type){
+            
+    //         case 'verifyEmail':
+    //             response = 
+    //                 `<div>
+                    
+    //                 <h1>Welcome to training-app</h1>
+    //                 <h3>Thank you for registering with us</h3>
+    //                 <p></p>
+    //                 <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
+                    
+    //                 </div>`
+    //         return response;
+            
+    //         case 'forgotpassword':
+    //             response = 
+    //             `<div>
+                
+    //             <h1>Password Recovery</h1>
+    //             <p></p>
+    //             <h2> <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>Reset Password</a></h2>
+    //             <p> If you didn't asked for a reset, just ignore this email</p>       
+    //             </div>`
+    //         return response;       
+        
+    //     }
+        
+    // } 
     const mailOptions = {
-        from: "d13g0d3v@gmail.com",
+        from: "Training App",
         to: email,
-        subject: "Email Verification Link",
-        html: `
-        <div>
-        <h1>Welcome to training-app</h1>
-        <h3>Thank you for registering with us</h3>
-        <p></p>
-        <h2> Please click on the <a href=http://localhost:4000/api/users/auth/verifyEmail/${uniqueString}>following link</a> to verify your account </h2>
-        </div>
-        `
+        subject:emailSubject,
+        html: `<div>
+                    
+                         <h1>Welcome to training-app</h1>
+                         <h3>Thank you for registering with us</h3>
+                         <p></p>
+                         <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
+                        
+                         </div>` 
     }
-
-    transporter.sendMail(mailOptions, function(error, response){
-        if(error){console.log(error)}
-        else{console.log("message sent")}
+    
+    let response = await transporter.sendMail(mailOptions)
+    .then(res => {
+        return {
+            res,
+            success:true
+        }
     })
+    .catch(err => {
+        return {
+            err,
+            success:false
+        }
+    })
+    
+    return response
 }
 
 const userControllers = {
@@ -84,7 +128,7 @@ const userControllers = {
                     res.json({
                         success: true,
                         from: from,
-                        message: "Added " + from + " to your methods to perform sign in"
+                        message: "Added " + from + " to your sign in methods"
                     })
                 }
             }
@@ -98,19 +142,32 @@ const userControllers = {
                     emailVerify,
                     uniqueString
                 })
+                
 
                 if (from === "signUp-form") {
 
                     await nuevoUsuario.save()
-                    // funcion que envia el mail de verificacion
-                    sendMail(email, uniqueString)
                     
-                    res.json({
+                    let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+
+                    if(mail.success){
+                        console.log('this is mail success' + mail.success)
+
+                        res.json({
                         success: true,
                         from: from,
-                        message: " Please you must validate your email, we have sent you an email to " + email + " for you to do it",
-                        
-                    })
+                        message: " We have sent you an email to " + email + " for validating your account",
+                        })
+                    }else{
+                        console.log('as email.success is false, were here')
+                       
+                        res.json({
+                            success: false,
+                            from: from,
+                            message: 'There was a problem while sending validation to ' + email + ' please, try again or correct your email',
+                        })
+                    }
+                    
                 }
                 else {
                     nuevoUsuario.emailVerify = true
@@ -130,17 +187,86 @@ const userControllers = {
         }
     },
 
+    sendEmail: async (req,res)=>{
+        let uniqueString
+        const { fullName, email, password, from, aplication } = req.body.userData
+        let user = await Users.findOne({ email })
+            .then(res => uniqueString = res.uniqueString)
+
+        let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+
+        if(mail.success){
+            res.json({
+            success: true,
+            from: from,
+            message: " Validation email successfully sent to " + email,
+            })
+        }else{          
+            res.json({
+                success: false,
+                from: from,
+                message: 'There was a problem while sending validation to ' + email + ' please, try again or correct your email',
+            })
+        }
+    },
+
+    deleteDocument: async (req,res)=>{
+        
+        try{
+            
+            const { firstName, email, password, from} = req.body
+            let userId = await Users.findOne({ email })
+            .then(res => {
+                return res.id
+            })
+
+            await Users.findByIdAndDelete(userId)
+            return res.status(200).json({success:true,message:'User deleted successfully'})
+        }catch(err){
+            console.log(err.message)
+            return res.status(500).json({success:false,message:'Internal server error'})
+        }
+    },
+    PreSignIn: async (req,res) => {
+        const {email,from,aplication} = req.query
+
+         try{
+             const usuario = await Users.findOne({email})
+            if(usuario){
+                 res.json({
+                     success:true,
+                     from: from,
+                     message:'User found'
+                 })
+             }else(
+                 res.json({
+                     success:false,
+                     from: from,
+                     message:'User not found'
+                 })
+             )
+            
+         }catch (error) {
+            console.error('Error during PreSignIn:', error);
+            res.status(500).json({
+                success: false,
+                from: from,
+                message: 'Internal Server Error'
+            });}
+    },
     SignIn: async (req, res) => {
         const { email, password, from, aplication } = req.body.userData
+        console.log(req.body.userData)
 
         try {
             const usuario = await Users.findOne({ email })
+            console.log(usuario)
 
             if (!usuario) {
                 res.json({
                     success: false,
                     from: from,
-                    message: "You had not signed Up with this email, please do so before signing in"
+                    message: "Please, sign up before logging in"
                 })
             } else {
                 const contraseñaCoincide = usuario.password.filter(pass => bcryptjs.compareSync(password, pass))
@@ -162,7 +288,7 @@ const userControllers = {
                             success: true,
                             from,
                             response: { token , dataUser },
-                            message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
+                            message: "Welcome " + dataUser.fullName + ", happy to see you back! " 
                         })
 
                     } else {
@@ -177,7 +303,7 @@ const userControllers = {
                             success: true,
                             from,
                             response: { token , dataUser },
-                            message: "We didn't have " + from + " in your methods to perform Sign In, but don't worry, we've added it!!!"
+                            message: from + " has been added to your login methods"
                         })
                     }
                 } else {
@@ -190,7 +316,7 @@ const userControllers = {
                             success: true,
                             from,
                             response: { token, dataUser },
-                            message: "Welcome " + dataUser.fullName + " we are happy to see you back !!! " 
+                            message: "Welcome " + dataUser.fullName + ", happy to see you back! " 
                         })
 
                     } else {
@@ -198,7 +324,7 @@ const userControllers = {
                         res.json({
                             success: false,
                             from,
-                            message: "We are sorry but the username or password do not match"
+                            message: "Username or password mismatch"
                         })
                     }
                 }
@@ -226,7 +352,7 @@ const userControllers = {
                 res.json({
                     success: false,
                     from: "verifyMail",
-                    message: "You have not verified your email"
+                    message: "You must verify your email before logging in."
                 })
             }
         }catch(err){console.log(err)}
@@ -236,39 +362,40 @@ const userControllers = {
             res.json({
                 success: true,
                 response: { id:req.user.id, fullName:req.user.fullName, email:req.user.email, from:"token", aplication: req.user.aplication },
-                message: "Welcome token is valid " + req.user.fullName 
+                message: "Welcome back " + req.user.fullName 
             })
         }else{
             res.json({
                 success:false,
-                message: "Please sign in again. Token is not valid"
+                message: "Invalid token, please sign in again"
             })
         }
     },
-    addFavEvent: async (req, res) => {
-        try {
-          const userId = req.param.id;
-          const eventId = req.body.eventId;
-      
-          const user = await Users.findOne({ id: userId });
-      
-          if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-          }
-      
-          if (user.favEvents.includes(eventId)) {
-            console.log(user)
-            return res.status(400).json({ success: false, message: 'The event is already in favourite' });
-          }
-      
-          user.favEvents.push(eventId);
-          const updatedFav = await user.save();
-      
-          return res.status(200).json({ success: true, user: updatedFav });
-        } catch (error) {
-          return res.status(500).json({ success: false, message: 'Internal server error' });
+    forgotPassword: async (req,res)=>{
+        const user = req.query.email;
+        const serverResponse =  await Users.findOne({ email: user })
+        const {fullName,email,from,uniqueString,emailVerify} = serverResponse
+
+        try{
+            if(user){
+                const subject =  "Password Recovery"
+                sendMail('forgotpassword',email, uniqueString,subject)
+                res.json({
+                    success:true,
+                    response:('hi'),
+                    message:'We have sent you an email'
+                })
+            }else{
+                res.json({
+                    success:false,
+                    message: "Email not found"
+                })
+            }
+        }catch(err){
+            console.log(err)
         }
-      },
+        
+    }
 }
 
 module.exports = userControllers
