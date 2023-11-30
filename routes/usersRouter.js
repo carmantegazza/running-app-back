@@ -14,6 +14,10 @@ usersRouter.route('/users/auth/signInToken').get(passport.authenticate('jwt', {s
 usersRouter.route('/users/auth/presignin').get(PreSignIn)
 usersRouter.route('/users/auth/forgotpassword').get(forgotPassword)
 
+usersRouter.put('/users/:id', usersControllers.addFavEvent)
+usersRouter.get('/user/:id', usersControllers.getUser)
+
+
 module.exports = usersRouter
 
 
