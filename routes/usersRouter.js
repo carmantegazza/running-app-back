@@ -9,6 +9,9 @@ usersRouter.route('/users/auth/signin').post(SignIn)
 usersRouter.route('/users/auth/verifyEmail/:string').get(verifyMail)
 usersRouter.route('/users/auth/signInToken').get(passport.authenticate('jwt', {session: false}), verificarToken)
 
+usersRouter.put('/users/:id', usersControllers.addFavEvent)
+
+
 module.exports = usersRouter
 
 

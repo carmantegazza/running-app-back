@@ -8,6 +8,7 @@ const userSchema =  new mongoose.Schema({
     aplication:{type:String},
     uniqueString:{type:String, required:true},
     emailVerify:{type:Boolean, required:true},
+    favEvents: {type:Array}
 })
 
 const User = mongoose.model('users', userSchema)

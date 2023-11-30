@@ -30,30 +30,29 @@ const eventsController = {
             return res.status(500).json({success:false})
         }
     },
-    updateEvent: async(req, res) => {
+    updateEvent: async (req, res) => {
         try {
-            const eventId = req.param.id
-            const userId = req.body.userId
-
-            const event = await Event.findOne({ _id: eventId });
-
-            if (!event) {
-            return res.status(500).json({ success: false, message: 'Event not found' });
-            }
-
-            if (event.users.includes(userId)) {
-            return res.status(500).json({ success: false, message: 'The user is already signed up fo the event' });
-            }
-
-            event.users.push(userId);
-            const updatedEvent = await event.save();
-
-            return res.status(200).json({ success: true, event: updatedEvent });
+          const eventId = req.params.id;
+          const userId = req.body.userId;
+      
+          const event = await Event.findOne({ _id: eventId });
+      
+          if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found' });
+          }
+      
+          if (event.usersJoin.includes(userId)) {
+            return res.status(400).json({ success: false, message: 'The user is already signed up for the event' });
+          }
+      
+          event.usersJoin.push(userId);
+          const updatedEvent = await event.save();
+      
+          return res.status(200).json({ success: true, event: updatedEvent });
         } catch (error) {
-            console.error('Error al actualizar el evento:', error);
-            return res.status(500).json({ success: false });
+          return res.status(500).json({ success: false, message: 'Internal server error' });
         }
-    },
+      },
 
     deleteEvent: async(req, res) => {
         try {

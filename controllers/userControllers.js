@@ -244,7 +244,31 @@ const userControllers = {
                 message: "Please sign in again. Token is not valid"
             })
         }
-    }
+    },
+    addFavEvent: async (req, res) => {
+        try {
+          const userId = req.param.id;
+          const eventId = req.body.eventId;
+      
+          const user = await Users.findOne({ id: userId });
+      
+          if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+          }
+      
+          if (user.favEvents.includes(eventId)) {
+            console.log(user)
+            return res.status(400).json({ success: false, message: 'The event is already in favourite' });
+          }
+      
+          user.favEvents.push(eventId);
+          const updatedFav = await user.save();
+      
+          return res.status(200).json({ success: true, user: updatedFav });
+        } catch (error) {
+          return res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      },
 }
 
 module.exports = userControllers
