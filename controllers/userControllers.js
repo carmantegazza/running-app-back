@@ -27,8 +27,7 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
             type: "OAuth2",
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
-            // refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-            refreshToken: process.env.GOOGLE_REFRESHTOKE,
+            refreshToken: process.env.GOOGLE_REFRESHTOKEN,
             accessToken: accessToken
         },
         tls:{
@@ -72,12 +71,12 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
         subject:emailSubject,
         html: `<div>
                     
-        //                 <h1>Welcome to training-app</h1>
-        //                 <h3>Thank you for registering with us</h3>
-        //                 <p></p>
-        //                 <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
+                         <h1>Welcome to training-app</h1>
+                         <h3>Thank you for registering with us</h3>
+                         <p></p>
+                         <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
                         
-        //                 </div>` 
+                         </div>` 
     }
     
     
