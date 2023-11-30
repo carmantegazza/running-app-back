@@ -30,14 +30,29 @@ const eventsController = {
             return res.status(500).json({success:false})
         }
     },
-    updateEvent: async(req, res) => {
+    updateEvent: async (req, res) => {
         try {
-            const event = await Event.findOneAndUpdate({_id:req.params.id}, req.body, {new:true})
-            return res.status(200).json({success:true, event:event})
+          const eventId = req.params.id;
+          const userId = req.body.userId;
+      
+          const event = await Event.findOne({ _id: eventId });
+      
+          if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found' });
+          }
+      
+          if (event.usersJoin.includes(userId)) {
+            return res.status(400).json({ success: false, message: 'The user is already signed up for the event' });
+          }
+      
+          event.usersJoin.push(userId);
+          const updatedEvent = await event.save();
+      
+          return res.status(200).json({ success: true, event: updatedEvent });
         } catch (error) {
-            return res.status(500).json({success:false})
+          return res.status(500).json({ success: false, message: 'Internal server error' });
         }
-    },
+      },
 
     deleteEvent: async(req, res) => {
         try {

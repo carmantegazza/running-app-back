@@ -28,7 +28,6 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
             refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-            //refreshToken: process.env.GOOGLE_REFRESHTOKE,
             accessToken: accessToken
         },
         tls:{
@@ -72,34 +71,13 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
         subject:emailSubject,
         html: `<div>
                     
-        //                 <h1>Welcome to training-app</h1>
-        //                 <h3>Thank you for registering with us</h3>
-        //                 <p></p>
-        //                 <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
+                         <h1>Welcome to training-app</h1>
+                         <h3>Thank you for registering with us</h3>
+                         <p></p>
+                         <h2> Please click on the <a href=http://localhost:4000/api/users/auth/${type}/${uniqueString}>following link</a> to verify your account </h2>
                         
-        //                 </div>` 
+                         </div>` 
     }
-    
-    
-    
-    
-    // await transporter.sendMail(mailOptions, function(error, response){
-    //     let transporterMail
-    //     if(error){
-
-    //         console.log('Mensaje no enviado')
-            
-    //         transporterMail = error
-
-    //     }else{
-
-    //         console.log('Mensaje enviado')
-    //         transporterMail = response    
-    //     }
-    //     //transporterMail = response
-    //     return transporterMail
-    // })
-    //.then(res => console.log(res))
     
     let response = await transporter.sendMail(mailOptions)
     .then(res => {
@@ -169,13 +147,12 @@ const userControllers = {
                 if (from === "signUp-form") {
 
                     await nuevoUsuario.save()
-
-                    const subject =  "Email Verification Link"
                     
-                    let mail = await sendMail('verifyEmail',email, uniqueString,subject)
-                    console.log('this is mail success' + mail.success)
+                    let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
 
                     if(mail.success){
+                        console.log('this is mail success' + mail.success)
+
                         res.json({
                         success: true,
                         from: from,
@@ -209,6 +186,47 @@ const userControllers = {
             res.json({ success: false, message: "Something has gone wrong, please try again in a few minutes"  })
         }
     },
+
+    sendEmail: async (req,res)=>{
+        let uniqueString
+        const { fullName, email, password, from, aplication } = req.body.userData
+        let user = await Users.findOne({ email })
+            .then(res => uniqueString = res.uniqueString)
+
+        let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+
+        if(mail.success){
+            res.json({
+            success: true,
+            from: from,
+            message: " Validation email successfully sent to " + email,
+            })
+        }else{          
+            res.json({
+                success: false,
+                from: from,
+                message: 'There was a problem while sending validation to ' + email + ' please, try again or correct your email',
+            })
+        }
+    },
+
+    deleteDocument: async (req,res)=>{
+        
+        try{
+            
+            const { firstName, email, password, from} = req.body
+            let userId = await Users.findOne({ email })
+            .then(res => {
+                return res.id
+            })
+
+            await Users.findByIdAndDelete(userId)
+            return res.status(200).json({success:true,message:'User deleted successfully'})
+        }catch(err){
+            console.log(err.message)
+            return res.status(500).json({success:false,message:'Internal server error'})
+        }
+    },
     PreSignIn: async (req,res) => {
         const {email,from,aplication} = req.query
 
@@ -238,9 +256,11 @@ const userControllers = {
     },
     SignIn: async (req, res) => {
         const { email, password, from, aplication } = req.body.userData
+        console.log(req.body.userData)
 
         try {
             const usuario = await Users.findOne({ email })
+            console.log(usuario)
 
             if (!usuario) {
                 res.json({
@@ -375,7 +395,31 @@ const userControllers = {
             console.log(err)
         }
         
-    }
+    },
+
+    addFavEvent: async (req, res) => {
+        try {
+          const userId = req.params.id;
+          const eventId = req.body.eventId;
+      
+          const user = await Users.findOne({ id: userId });
+      
+          if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+          }
+      
+          if (user.favEvents.includes(userId)) {
+            return res.status(400).json({ success: false, message: 'The event is already in favourites' });
+          }
+      
+          user.favEvents.push(eventId);
+          const updatedUser = await user.save();
+      
+          return res.status(200).json({ success: true, event: updatedUser });
+        } catch (error) {
+          return res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      }
 }
 
 module.exports = userControllers

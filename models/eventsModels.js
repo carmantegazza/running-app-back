@@ -2,12 +2,14 @@ const mongoose = require('mongoose')
 
 const eventsSchema = new mongoose.Schema({
     name:{type: String, required: true},
-    description:{type: String},
+    description:{type: String, required: true},
     date:{type: Date},
-    price:{type: Number},
-    organizer:{type: String},
+    price:{type: Number, required: true},
+    organizer:{type: String, required: true},
     organizer_img:{type: String},
-    route: {type: mongoose.Types.ObjectId, ref:'routes'}
+    route: {type: mongoose.Types.ObjectId, ref:'routes'},
+    usersJoin: {type: Array},
+    date:{type: Date}
 })
 
 const Event = mongoose.model('events', eventsSchema)
