@@ -395,7 +395,31 @@ const userControllers = {
             console.log(err)
         }
         
-    }
+    },
+
+    addFavEvent: async (req, res) => {
+        try {
+          const userId = req.params.id;
+          const eventId = req.body.eventId;
+      
+          const user = await Users.findOne({ id: userId });
+      
+          if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+          }
+      
+          if (user.favEvents.includes(userId)) {
+            return res.status(400).json({ success: false, message: 'The event is already in favourites' });
+          }
+      
+          user.favEvents.push(eventId);
+          const updatedUser = await user.save();
+      
+          return res.status(200).json({ success: true, event: updatedUser });
+        } catch (error) {
+          return res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      }
 }
 
 module.exports = userControllers
