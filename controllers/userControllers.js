@@ -347,7 +347,7 @@ const userControllers = {
             if (user){
                 user.emailVerify = true
                 await user.save()
-                res.redirect('http://localhost:3000/signin')
+                res.redirect('http://localhost:3000/login')
             }
             else {
                 res.json({
