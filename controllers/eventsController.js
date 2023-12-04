@@ -47,7 +47,7 @@ const eventsController = {
       
           event.usersJoin.push(userId);
           const updatedEvent = await event.save();
-      
+          console.log(updatedEvent)
           return res.status(200).json({ success: true, event: updatedEvent });
         } catch (error) {
           return res.status(500).json({ success: false, message: 'Internal server error' });

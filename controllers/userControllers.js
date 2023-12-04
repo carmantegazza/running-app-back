@@ -764,7 +764,7 @@ const userControllers = {
         
     },
 
-    addFavEvent: async (req, res) => {
+    updateFavEvent: async (req, res) => {
         try {
           const userId = req.params.id;
           const eventId = req.body.eventId;
@@ -776,11 +776,15 @@ const userControllers = {
           }
       
           if (user.favEvents.includes(eventId)) {
-            return res.status(400).json({ success: false, message: 'The event is already in favourites' });
+            user.favEvents.pull(eventId);
+            const updatedUser = await user.save();
+            return res.status(200).json({ success: true, message: 'The event has been removed from favourites', event: updatedUser });
           }
       
           user.favEvents.push(eventId);
           const updatedUser = await user.save();
+          console.log(user.favEvents)
+
       
           return res.status(200).json({ success: true, event: updatedUser });
         } catch (error) {
