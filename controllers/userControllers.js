@@ -515,7 +515,7 @@ const userControllers = {
 
                     await nuevoUsuario.save()
                     
-                    let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+                    let mail = await sendMail('verifyEmail', email, uniqueString, "Email Verification Link")
 
                     if(mail.success){
                         console.log('this is mail success' + mail.success)
@@ -560,7 +560,7 @@ const userControllers = {
         let user = await Users.findOne({ email })
             .then(res => uniqueString = res.uniqueString)
 
-        let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+        let mail = await sendMail( 'verifyEmail', email, uniqueString, "Email Verification Link")
 
         if(mail.success){
             res.json({
