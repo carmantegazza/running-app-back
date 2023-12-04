@@ -16,6 +16,7 @@ usersRouter.route('/users/auth/forgotpassword').get(forgotPassword)
 
 usersRouter.put('/users/:id', usersControllers.addFavEvent)
 usersRouter.get('/user/:id', usersControllers.getUser)
+// usersRouter.put('/users/:id', usersControllers.updateUser)
 
 
 module.exports = usersRouter
