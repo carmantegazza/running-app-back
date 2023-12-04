@@ -1124,8 +1124,8 @@ const userControllers = {
     },
     displayChangePasswordForm:async (req,res)=>{
       const {string}=req.params
-      console.log(req)
       res.redirect(`http://localhost:3000/forgotpassword?string=${string}`)
+
     },
     changePassword: async (req,res)=>{
       const {newPassword,repeatPassword,uniqueString} = req.body
@@ -1137,6 +1137,7 @@ const userControllers = {
           user.password = contraseñaHash
           await user.save()
           res.redirect('http://localhost:3000/login')
+
         }else{
           res.json({
             success:false,
