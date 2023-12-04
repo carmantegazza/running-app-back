@@ -63,6 +63,33 @@ const eventsController = {
         }
       },
 
+    unsuscribeFromEvent: async (req, res) => {
+      try {
+      const eventId = req.params.id;
+      const userId = req.body.userId;
+      console.log(eventId)
+      console.log(userId) 
+
+      const event = await Event.findOne({ _id: eventId });
+      
+      if (!event) {
+        return res.status(404).json({ success: false, message: 'Event not found' });
+      }
+  
+      if (!event.usersJoin.includes(userId)) {
+        return res.status(400).json({ success: false, message: 'The user is not suscribed to the event' });
+      }
+
+      event.usersJoin.pull(userId);
+      const updatedEvent = await event.save();
+      console.log(updatedEvent)
+      return res.status(200).json({ success: true, event: updatedEvent });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  },
+
+
     deleteEvent: async(req, res) => {
         try {
             await Event.findOneAndDelete({_id:req.params.id})
