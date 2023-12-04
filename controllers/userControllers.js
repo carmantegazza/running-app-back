@@ -1133,8 +1133,6 @@ const userControllers = {
       try{
         if(user && newPassword === repeatPassword){
 
-
-
           const contraseñaHash = bcryptjs.hashSync(newPassword, 10)
           user.password = contraseñaHash
           await user.save()
