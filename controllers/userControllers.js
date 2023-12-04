@@ -2,7 +2,7 @@ const bcryptjs = require('bcryptjs')
 const Users = require('../models/userModel')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
-const {google} = require('googleapis') 
+const { google } = require('googleapis') 
 const OAuth2 = google.auth.OAuth2
 const jwt = require('jsonwebtoken')
 

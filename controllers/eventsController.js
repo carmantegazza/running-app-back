@@ -1,4 +1,39 @@
 const Event = require('../models/eventsModels')
+const Users = require('../models/userModel')
+
+
+
+// const sendEventEmail = async (email, emailSubject) => {
+//   const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth:{
+//       user:"aprosgonzalo@gmail.com",
+//       type: "OAuth2",
+//       clientId: process.env.GOOGLE_CLIENTID,
+//       clientSecret:process.env.GOOGLE_SECRET,
+//       refreshToken: process.env.GOOGLE_REFRESHTOKEN,
+//       accessToken: accessToken
+//   },
+//   tls:{
+//       rejectUnauthorized: false
+//   } 
+//   });
+  
+//   const mailOptions = {
+//     from: "Training App",
+//     to: email,
+//     subject: emailSubject,
+//     text: 'mail de aviso de evento'
+    
+//   };
+
+//   try {
+//     await transporter.sendMail(mailOptions);
+//     console.log('Correo electrónico enviado con éxito');
+//   } catch (error) {
+//     console.error('Error al enviar el correo electrónico:', error);
+//   }
+// };
 
 const eventsController = {
     getEvents: async(req, res) => {
@@ -34,9 +69,11 @@ const eventsController = {
         try {
           const eventId = req.params.id;
           const userId = req.body.userId;
-      
+          console.log(eventId)
+          console.log(userId) 
+
           const event = await Event.findOne({ _id: eventId });
-      
+          
           if (!event) {
             return res.status(404).json({ success: false, message: 'Event not found' });
           }
@@ -46,6 +83,7 @@ const eventsController = {
           }
       
           event.usersJoin.push(userId);
+          // sendEventEmail(user.email)
           const updatedEvent = await event.save();
           console.log(updatedEvent)
           return res.status(200).json({ success: true, event: updatedEvent });
@@ -74,5 +112,7 @@ const eventsController = {
         }
     }
 }
+
+
 
 module.exports = eventsController
