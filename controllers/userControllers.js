@@ -424,7 +424,7 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
           }
           return response;
 
-          case 'forgotpassword':
+        case 'forgotpassword':
             response = {
             from: "Training App",
             to: email,
@@ -1122,10 +1122,41 @@ const userControllers = {
         }
         
     },
-    changePassword:async (req,res)=>{
-      res.redirect('http://localhost:3000/login')
-      // navigate('/login')
+    displayChangePasswordForm:async (req,res)=>{
+      const {string}=req.params
+      console.log(req)
+      res.redirect(`http://localhost:3000/forgotpassword?string=${string}`)
     },
+    changePassword: async (req,res)=>{
+      const {newPassword,repeatPassword,uniqueString} = req.body
+      const user =  await Users.findOne({ uniqueString:uniqueString })
+      try{
+        if(user && newPassword === repeatPassword){
+
+
+
+          const contraseñaHash = bcryptjs.hashSync(newPassword, 10)
+          user.password = contraseñaHash
+          await user.save()
+          res.redirect('http://localhost:3000/login')
+        }else{
+          res.json({
+            success:false,
+            message: "Passwords must match"
+          })  
+        }
+      }catch(e){
+        res.json({
+          success:false,
+          message: "Internal server error, please try again later"
+        })
+        console.error(e)
+
+      }
+
+
+    },
+
 
     updateFavEvent: async (req, res) => {
         try {
