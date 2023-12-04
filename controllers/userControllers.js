@@ -6,13 +6,9 @@ const { google } = require('googleapis')
 const OAuth2 = google.auth.OAuth2
 const jwt = require('jsonwebtoken')
 
+
 const sendMail = async (type,email, uniqueString,emailSubject)=>{
-    switch(type){
-      case 'emailVerify':
-        break;
-      case 'forgotpassword':
-        break;
-    }
+    
     const myOAuth2Client = new OAuth2(
         process.env.GOOGLE_CLIENTID,
         process.env.GOOGLE_SECRET,
@@ -42,11 +38,11 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
     })
 
    
-    const mailOptions = (typeOfReq) => {
+    const mailOptions = () => {
       let response = {};
-
-      switch(typeOfReq){
-        case 'passwordRecovery' :
+      console.log(type)
+      switch(type){
+        case 'verifyEmail' :
 
         response = {from: "Training App",
         to: email,
@@ -428,7 +424,7 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
           }
           return response;
 
-          case 'emailVerify':
+          case 'forgotpassword':
             response = {
             from: "Training App",
             to: email,
@@ -810,8 +806,7 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
         return response
       }
     }
-    
-    let response = await transporter.sendMail(mailOptions)
+    let response = await transporter.sendMail(mailOptions())
     .then(res => {
         return {
             res,
@@ -1110,8 +1105,7 @@ const userControllers = {
 
         try{
             if(user){
-                const subject =  "Password Recovery"
-                sendMail('forgotpassword',email, uniqueString,subject)
+                sendMail('forgotpassword',email, uniqueString,"Password Recovery")
                 res.json({
                     success:true,
                     response:('hi'),
@@ -1127,6 +1121,10 @@ const userControllers = {
             console.log(err)
         }
         
+    },
+    changePassword:async (req,res)=>{
+      res.redirect('http://localhost:3000/login')
+      // navigate('/login')
     },
 
     updateFavEvent: async (req, res) => {
