@@ -1,41 +1,6 @@
 const Event = require('../models/eventsModels')
 const Users = require('../models/userModel')
-const nodemailer = require('nodemailer')
-const { google } = require('googleapis') 
-const OAuth2 = google.auth.OAuth2
-
-
-const sendEventEmail = async (email, emailSubject) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth:{
-      user:"aprosgonzalo@gmail.com",
-      type: "OAuth2",
-      clientId: process.env.GOOGLE_CLIENTID,
-      clientSecret:process.env.GOOGLE_SECRET,
-      refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-      accessToken: accessToken
-  },
-  tls:{
-      rejectUnauthorized: false
-  } 
-  });
-  
-  const mailOptions = {
-    from: "Training App",
-    to: email,
-    subject: emailSubject,
-    text: 'mail de aviso de evento'
-    
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log('Correo electrónico enviado con éxito');
-  } catch (error) {
-    console.error('Error al enviar el correo electrónico:', error);
-  }
-};
+// const Algo = require('./userControllers')
 
 const eventsController = {
     getEvents: async(req, res) => {
@@ -77,6 +42,8 @@ const eventsController = {
           const event = await Event.findOne({ _id: eventId });
 
           const user = await Users.findOne({_id: userId});
+          console.log(user.email) 
+
           
           if (!event) {
             return res.status(404).json({ success: false, message: 'Event not found' });
@@ -87,7 +54,7 @@ const eventsController = {
           }
       
           event.usersJoin.push(userId);
-          sendEventEmail(user.email)
+          // Algo.sendMail.sendMail('joinEvent', user.email, '', 'Congrats! You joined the event!')
           const updatedEvent = await event.save();
           console.log(updatedEvent)
           return res.status(200).json({ success: true, event: updatedEvent });
@@ -107,16 +74,15 @@ const eventsController = {
 
     getEventsFromOneRoute: async(req, res) => {
         let events = []
-        let {id} = req.params
+        let routeId = req.params.id
         try {
-            events = await Event.find({route:id}).populate('route', {name:1}, {difficulty:1})
+            events = await Event.findOne({route: routeId})
+            console.log(events)
             return res.status(200).json({success:true, events:events})    
         } catch (error) {
             return res.status(500).json({success:false})
         }
     }
 }
-
-
 
 module.exports = eventsController
