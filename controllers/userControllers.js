@@ -2,13 +2,12 @@ const bcryptjs = require('bcryptjs')
 const Users = require('../models/userModel')
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
-const { google } = require('googleapis') 
+const {google} = require('googleapis') 
 const OAuth2 = google.auth.OAuth2
 const jwt = require('jsonwebtoken')
 
-
 const sendMail = async (type,email, uniqueString,emailSubject)=>{
-    
+
     const myOAuth2Client = new OAuth2(
         process.env.GOOGLE_CLIENTID,
         process.env.GOOGLE_SECRET,
@@ -24,18 +23,18 @@ const sendMail = async (type,email, uniqueString,emailSubject)=>{
 
         service: "gmail",
         auth:{
-            user:"aprosgonzalo@gmail.com",
+            user:"ai.training.app@gmail.com",
             type: "OAuth2",
             clientId: process.env.GOOGLE_CLIENTID,
             clientSecret:process.env.GOOGLE_SECRET,
             refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-            //refreshToken: process.env.GOOGLE_REFRESHTOKE,
             accessToken: accessToken
         },
         tls:{
             rejectUnauthorized: false
         } 
     })
+
 
    
     const mailOptions = () => {
@@ -875,7 +874,7 @@ const userControllers = {
 
                     await nuevoUsuario.save()
                     
-                    let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+                    let mail = await sendMail('verifyEmail', email, uniqueString, "Email Verification Link")
 
                     if(mail.success){
                         console.log('this is mail success' + mail.success)
@@ -920,7 +919,7 @@ const userControllers = {
         let user = await Users.findOne({ email })
             .then(res => uniqueString = res.uniqueString)
 
-        let mail = await sendMail('verifyEmail',email, uniqueString,"Email Verification Link")
+        let mail = await sendMail( 'verifyEmail', email, uniqueString, "Email Verification Link")
 
         if(mail.success){
             res.json({
@@ -1105,7 +1104,8 @@ const userControllers = {
 
         try{
             if(user){
-                sendMail('forgotpassword',email, uniqueString,"Password Recovery")
+                const subject =  "Password Recovery"
+                sendMail('forgotpassword',email, uniqueString,subject)
                 res.json({
                     success:true,
                     response:('hi'),
@@ -1158,6 +1158,8 @@ const userControllers = {
 
 
     updateFavEvent: async (req, res) => {
+
+    addFavEvent: async (req, res) => {
         try {
           const userId = req.params.id;
           const eventId = req.body.eventId;
@@ -1169,15 +1171,11 @@ const userControllers = {
           }
       
           if (user.favEvents.includes(eventId)) {
-            user.favEvents.pull(eventId);
-            const updatedUser = await user.save();
-            return res.status(200).json({ success: true, message: 'The event has been removed from favourites', event: updatedUser });
+            return res.status(400).json({ success: false, message: 'The event is already in favourites' });
           }
       
           user.favEvents.push(eventId);
           const updatedUser = await user.save();
-          console.log(user.favEvents)
-
       
           return res.status(200).json({ success: true, event: updatedUser });
         } catch (error) {
