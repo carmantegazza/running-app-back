@@ -9,7 +9,6 @@ const eventsSchema = new mongoose.Schema({
     organizer_img:{type: String},
     route: {type: mongoose.Types.ObjectId, ref:'routes'},
     usersJoin: {type: Array},
-    date:{type: Date}
 })
 
 const Event = mongoose.model('events', eventsSchema)

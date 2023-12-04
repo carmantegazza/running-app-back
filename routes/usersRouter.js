@@ -13,11 +13,13 @@ usersRouter.route('/users/auth/verifyEmail/:string').get(verifyMail)
 usersRouter.route('/users/auth/signInToken').get(passport.authenticate('jwt', {session: false}), verificarToken)
 usersRouter.route('/users/auth/presignin').get(PreSignIn)
 usersRouter.route('/users/auth/forgotpassword').get(forgotPassword)
+usersRouter.route('/users/auth/forgotpassword/:string').get(verifyMail)
 
-usersRouter.put('/users/:id', usersControllers.addFavEvent)
+
+usersRouter.put('/users/:id', usersControllers.updateFavEvent)
 usersRouter.get('/user/:id', usersControllers.getUser)
-// usersRouter.put('/users/:id', usersControllers.updateUser)
 
+usersRouter.put('/updateusers/:id', usersControllers.updateUser);
 
 module.exports = usersRouter
 
