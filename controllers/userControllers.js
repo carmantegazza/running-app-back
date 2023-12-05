@@ -1156,11 +1156,9 @@ const userControllers = {
 
     },
 
-
     updateFavEvent: async (req, res) => {
 
-    addFavEvent: async (req, res) => {
-        try {
+    try {
           const userId = req.params.id;
           const eventId = req.body.eventId;
       
