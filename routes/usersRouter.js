@@ -19,6 +19,7 @@ usersRouter.route('/users/auth/changePassword').post(changePassword)
 usersRouter.put('/users/:id', usersControllers.updateFavEvent)
 usersRouter.get('/user/:id', usersControllers.getUser)
 
+usersRouter.put('/updateuser/:id', usersControllers.updateUser);
 
 module.exports = usersRouter
 
