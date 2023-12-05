@@ -1186,7 +1186,7 @@ const userControllers = {
       return res.status(500).json({ success: false, message: 'Internal server error' });
     }
   },
-  
+
   getUser: async (req, res) => {
     try {
       const route = await Users.findById(req.params.id)
@@ -1195,6 +1195,29 @@ const userControllers = {
       return res.status(500).json({ success: false })
     }
   },
+
+  updateUser: async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const fullName = req.body.fullName;
+      const email = req.body.email;
+      const user = await Users.findOne({ _id: userId });
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+  
+      user.fullName = fullName; 
+      user.email = email; 
+      const updatedUser = await user.save();
+  
+      return res.status(200).json({ success: true, event: updatedUser });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      return res.status(500).json({ success: false, message: 'Internal server error', error: error.message });
+    }
+  }
+  
 
 }
 
