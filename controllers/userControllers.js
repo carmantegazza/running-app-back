@@ -7,12 +7,7 @@ const OAuth2 = google.auth.OAuth2
 const jwt = require('jsonwebtoken')
 
 const sendMail = async (type, email, uniqueString, emailSubject) => {
-  switch (type) {
-    case 'emailVerify':
-      break;
-    case 'forgotpassword':
-      break;
-  }
+
   const myOAuth2Client = new OAuth2(
     process.env.GOOGLE_CLIENTID,
     process.env.GOOGLE_SECRET,
@@ -28,12 +23,11 @@ const sendMail = async (type, email, uniqueString, emailSubject) => {
 
     service: "gmail",
     auth: {
-      user: "aprosgonzalo@gmail.com",
+      user: "ai.training.app@gmail.com",
       type: "OAuth2",
       clientId: process.env.GOOGLE_CLIENTID,
       clientSecret: process.env.GOOGLE_SECRET,
       refreshToken: process.env.GOOGLE_REFRESHTOKEN,
-      //refreshToken: process.env.GOOGLE_REFRESHTOKE,
       accessToken: accessToken
     },
     tls: {
@@ -42,11 +36,12 @@ const sendMail = async (type, email, uniqueString, emailSubject) => {
   })
 
 
-  const mailOptions = (typeOfReq) => {
-    let response = {};
 
-    switch (typeOfReq) {
-      case 'passwordRecovery':
+  const mailOptions = () => {
+    let response = {};
+    console.log(type)
+    switch (type) {
+      case 'verifyEmail':
 
         response = {
           from: "Training App",
@@ -429,7 +424,7 @@ const sendMail = async (type, email, uniqueString, emailSubject) => {
         }
         return response;
 
-      case 'emailVerify':
+      case 'forgotpassword':
         response = {
           from: "Training App",
           to: email,
@@ -811,8 +806,7 @@ const sendMail = async (type, email, uniqueString, emailSubject) => {
         return response
     }
   }
-
-  let response = await transporter.sendMail(mailOptions)
+  let response = await transporter.sendMail(mailOptions())
     .then(res => {
       return {
         res,
@@ -1130,8 +1124,41 @@ const userControllers = {
     }
 
   },
+  displayChangePasswordForm: async (req, res) => {
+    const { string } = req.params
+    res.redirect(`http://localhost:3000/forgotpassword?string=${string}`)
 
-  updateFavEvent: async (req, res) => {
+  },
+  changePassword: async (req, res) => {
+    const { newPassword, repeatPassword, uniqueString } = req.body
+    const user = await Users.findOne({ uniqueString: uniqueString })
+    try {
+      if (user && newPassword === repeatPassword) {
+
+        const contraseñaHash = bcryptjs.hashSync(newPassword, 10)
+        user.password = contraseñaHash
+        await user.save()
+        res.redirect('http://localhost:3000/login')
+
+      } else {
+        res.json({
+          success: false,
+          message: "Passwords must match"
+        })
+      }
+    } catch (e) {
+      res.json({
+        success: false,
+        message: "Internal server error, please try again later"
+      })
+      console.error(e)
+
+    }
+
+
+  },
+
+  addFavEvent: async (req, res) => {
     try {
       const userId = req.params.id;
       const eventId = req.body.eventId;
@@ -1143,15 +1170,11 @@ const userControllers = {
       }
 
       if (user.favEvents.includes(eventId)) {
-        user.favEvents.pull(eventId);
-        const updatedUser = await user.save();
-        return res.status(200).json({ success: true, message: 'The event has been removed from favourites', event: updatedUser });
+        return res.status(400).json({ success: false, message: 'The event is already in favourites' });
       }
 
       user.favEvents.push(eventId);
       const updatedUser = await user.save();
-      console.log(user.favEvents)
-
 
       return res.status(200).json({ success: true, event: updatedUser });
     } catch (error) {
@@ -1164,56 +1187,6 @@ const userControllers = {
       return res.status(200).json({ success: true, message: 'User found', route: route })
     } catch (error) {
       return res.status(500).json({ success: false })
-    }
-  },
-
-  // updateUser: async (req, res) => {
-  //   try {
-  //     const { fullName, email } = req.body.user;
-
-  //     if (!fullName || !email) {
-  //       return res.status(400).json({ success: false, message: 'Missing or invalid data for update.' });
-  //     }
-
-
-
-  //     const user = await Users.findOne({ _id: userId });
-
-  //     if (!user) {
-  //       return res.status(404).json({ success: false, message: 'User not found' });
-  //     }
-
-  //     user.fullName = fullName;
-  //     user.email = email;
-
-  //     const updatedUser = await user.save();
-  //     console.log('User ID:', userId);
-  //     console.log('Updated User:', updatedUser);
-  //     return res.status(200).json({ success: true, user: updatedUser });
-  //   } catch (error) {
-  //     return res.status(500).json({ success: false, message: 'Internal server error' });
-  //   }
-  // },
-
-  updateUser: async (req, res) => {
-    try {
-      const userId = req.params.id;
-      const { fullName, email } = req.body.userData;
-
-      const user = await Users.findOne({ _id: userId });
-
-      if (!user) {
-        return res.status(404).json({ success: false, message: 'User not found' });
-      }
-
-      user.fullName = fullName;
-      user.email = email;
-
-      const updatedUser = await user.save();
-
-      return res.status(200).json({ success: true, user: updatedUser });
-    } catch (error) {
-      return res.status(500).json({ success: false, message: 'Internal server error' });
     }
   },
 
