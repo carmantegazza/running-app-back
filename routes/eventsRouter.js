@@ -13,6 +13,4 @@ eventsRouter.delete('/event/:id', eventsController.deleteEvent)
 
 eventsRouter.get('/eventforroute/:id', eventsController.getEventsFromOneRoute)
 
-// eventsRouter.delete('/event/:id', eventsController.deleteUserByEvent)
-
 module.exports = eventsRouter
